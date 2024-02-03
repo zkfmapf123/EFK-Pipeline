@@ -54,3 +54,36 @@ a           A
     - 필요없는 단어의 경우 검색을 느려지게 만듬 (a, the, and, leedonggyu)
     - ***Stop Words 설정을 통해서 인덱스에서 제거, 검색어에 등장해도 무시 가능
     - 업데이트, 삭제 및 삽입의 대해서는 유지관리 비용이 큼
+
+## Docker & Docker-compose 설치 Script
+
+```sh
+## update
+sudo yum update -y
+
+## docker
+sudo yum install docker -y
+sudo usermod -aG docker $USER
+sudo newgrp docker
+sudo systemctl restart docker
+
+## docker-compose 
+sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose ## symbolic 링크생성
+```
+
+## SSM 명령어 모음
+
+```sh
+## Instance Start
+aws ssm start-session --target [INSTANCE_ID]
+
+## SCP
+aws ssm send-command \
+    --instance-ids i-043d31eb30056190b \
+    --document-name "AWS-RunShellScript" \
+    --parameters commands="bash -s" \
+    --region ap-northeast-2 \
+    --scripts file://compose-files/es.docker-compose.yml
+```

@@ -1,0 +1,82 @@
+version: "3.8"
+services:
+  ## es-master-1
+  es-master-1:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
+    container_name: es-master-1
+    ports:
+      - "9200:9200"
+    volumes:
+      - ./volumes/es-master:/usr/share/elasticsearch/data
+    ulimits: ## 프로세스가 사용할 수 있는 자원의 제한 설정
+      memlock:
+        soft: -1 ## Soft Limit (-1 제한 해제)
+        hard: -1 ## Hard Limit (-1 제한 해제)
+    environment:
+      ES_SETTING_BOOTSTRAP_MEMORY__LOCK: "true" ## 메모리 락 여부 Heap 사이즈를 ES로 사용하겠다.
+      ES_JAVA_OPTS: "-Xmx512m -Xms512m -Xlog:disable" ## JVM이 사용할 수 있는 최대, 초기 용량,JVM 로깅 활성화 여부
+      node.name: es-master-1
+      node.roles: master ## 기본적인 Role 이름 (사이트 참조)
+      network.host: 0.0.0.0
+      cluster.name: es-cluster
+      cluster.initial_master_nodes: es-master-1
+      discovery.seed_hosts: es-master-1,es-slave-1,es-slave-2
+      xpack.security.enabled: "false" ## 보안기능 활성화 여부
+      xpack.monitoring.collection.enabled: "false" ## 클러스터링의 모니러팅 활성화 여부
+  ## es-slave-1
+  es-slave-1:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
+    container_name: es-slave-1
+    volumes:
+      - ./volumes/es-slave-1:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    environment:
+      ES_SETTING_BOOTSTRAP_MEMORY__LOCK: "true"
+      ES_JAVA_OPTS: "-Xmx512m -Xms512m -Xlog:disable"
+      node.name: es-slave-1
+      node.roles: data,ingest
+      cluster.name: es-cluster
+      cluster.initial_master_nodes: es-master-1
+      discovery.seed_hosts: es-master-1,es-slave-1,es-slave-2
+      xpack.security.enabled: "false"
+      xpack.monitoring.collection.enabled: "false"
+
+  ## es-slave-2
+  es-slave-2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
+    container_name: es-slave-2
+    volumes:
+      - ./volumes/es-slave-2:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    environment:
+      ES_SETTING_BOOTSTRAP_MEMORY__LOCK: "true"
+      ES_JAVA_OPTS: "-Xmx512m -Xms512m -Xlog:disable"
+      node.name: es-slave-2
+      node.roles: data,ingest
+      cluster.name: es-cluster
+      cluster.initial_master_nodes: es-master-1
+      discovery.seed_hosts: es-master-1,es-slave-1,es-slave-2
+      xpack.security.enabled: "false"
+      xpack.monitoring.collection.enabled: "false"
+  ## metric beat
+  ## System Metric을 구성할 수 있음
+  metric-beat:
+    image: docker.elastic.co/beats/metricbeat:7.16.2
+    container_name: metricbeat
+    environment:
+      ELASTICSEARCH_HOSTS: http://es-master-1:9200
+    restart: always
+    volumes:
+      - ./config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml
+
+## Common-network
+networks:
+  default:
+    external:
+      name: elk-network
