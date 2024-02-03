@@ -73,17 +73,15 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose ## symbolic 링크생성
 ```
 
-## SSM 명령어 모음
+## Nginx Revser Proxy
 
 ```sh
-## Instance Start
-aws ssm start-session --target [INSTANCE_ID]
-
-## SCP
-aws ssm send-command \
-    --instance-ids i-043d31eb30056190b \
-    --document-name "AWS-RunShellScript" \
-    --parameters commands="bash -s" \
-    --region ap-northeast-2 \
-    --scripts file://compose-files/es.docker-compose.yml
+ location /es/ {
+                rewrite ^/es(/.*)$ $1 break;
+                proxy_pass http://10.0.100.10:9200;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+    }
 ```
