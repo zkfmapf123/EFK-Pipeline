@@ -180,3 +180,19 @@ http {
 }
 ```
 - <a href="https://m.blog.naver.com/hsmang/221836126462"> Amazon Linux2 Nginx HTTPS </a> 
+
+## Kibana use nginx Reverse Proxy
+
+```sh
+    ## kibana는 뒤에 / 붙히지 말자... 절대로...
+
+    location / {
+		proxy_pass http://10.0.100.10:5601;
+
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection 'upgrade';
+		proxy_set_header Host $host;
+		proxy_cache_bypass $http_upgrade;
+	}
+```
