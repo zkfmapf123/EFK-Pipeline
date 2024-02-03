@@ -21,6 +21,8 @@ resource "aws_security_group" "es-sg" {
   }
 }
 
+## Docker, Docker-compose 설치 
+## compose-files/es.docker-compose 
 module "default-public-ins" {
   source = "zkfmapf123/simpleEC2/lee"
 

@@ -15,12 +15,14 @@ services:
     environment:
       ES_SETTING_BOOTSTRAP_MEMORY__LOCK: "true" ## 메모리 락 여부 Heap 사이즈를 ES로 사용하겠다.
       ES_JAVA_OPTS: "-Xmx512m -Xms512m -Xlog:disable" ## JVM이 사용할 수 있는 최대, 초기 용량,JVM 로깅 활성화 여부
-      node.name: es-master-1
+      node.name: es-master-1 ## Node 이름 (Required)
       node.roles: master ## 기본적인 Role 이름 (사이트 참조)
-      network.host: 0.0.0.0
-      cluster.name: es-cluster
+      network.host: 0.0.0.0 ## 지정된 ip만 접속가능하게 할수있는 기능 (Required) / 0.0.0.0으로하면 전체 가능 / 설정 시 운영모드로 변경됨
+      ## http.port: 9200 ## main port / 운영상에선 바꿀수 있음
+      ## transport.port: 9300 ## 내부 통신 포트
+      cluster.name: es-cluster ## Cluster 이름 (Required)
       cluster.initial_master_nodes: es-master-1
-      discovery.seed_hosts: es-master-1,es-slave-1,es-slave-2
+      discovery.seed_hosts: es-master-1,es-slave-1,es-slave-2 ## 원격노드들을 찾아서 binding
       xpack.security.enabled: "false" ## 보안기능 활성화 여부
       xpack.monitoring.collection.enabled: "false" ## 클러스터링의 모니러팅 활성화 여부
   ## es-slave-1

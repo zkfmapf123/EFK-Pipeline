@@ -76,12 +76,15 @@ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose ## symbolic 링
 ## Nginx Revser Proxy
 
 ```sh
+    ## curl localhost:9200
+    ## curl localhost:9200/_cluster/health
+
  location /es/ {
-                rewrite ^/es(/.*)$ $1 break;
-                proxy_pass http://10.0.100.10:9200;
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto $scheme;
-    }
+    rewrite ^/es(/.*)$ $1 break;
+    proxy_pass http://10.0.100.10:9200;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
 ```
