@@ -9,6 +9,13 @@ resource "aws_security_group" "es-sg" {
     security_groups = [aws_security_group.ec2-proxy-sg.id]
   }
 
+  ingress {
+    from_port       = 5601
+    to_port         = 5601
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ec2-proxy-sg.id]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
