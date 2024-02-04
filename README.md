@@ -196,3 +196,40 @@ http {
 		proxy_cache_bypass $http_upgrade;
 	}
 ```
+
+## Stack Monitoring use MetricBeat
+
+```yml
+    ## es.docker-compose.yml
+    metric-beat:
+    image: docker.elastic.co/beats/metricbeat:7.16.2
+    container_name: metricbeat
+    environment:
+      ELASTICSEARCH_HOSTS: http://es-master-1:9200
+    restart: always
+    volumes:
+      - ./metricbeat.yml:/usr/share/metricbeat/metricbeat.yml
+
+    ## metricbeat.yml
+    metricbeat.config.modules:
+    enabled: true
+    reload.enabled: true
+    reload.period: 10s
+    path: ${path.config}/modules.d/*.yml
+
+    setup.dashboards.enabled: true
+    setup.kibana.host: kibana:5601
+
+    output.elasticsearch:
+        hosts: ["es-master-1:9200"]
+
+    metricbeat.modules:
+    - module: elasticsearch
+        xpack.enabled: true
+        period: 10s
+        hosts:
+        [
+            "http://es-master-1:9200",
+            "http://es-slave-1:9200",
+        ]
+```
