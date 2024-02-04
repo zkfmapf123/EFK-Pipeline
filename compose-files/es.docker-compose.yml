@@ -25,6 +25,7 @@ services:
       discovery.seed_hosts: es-master-1,es-slave-1 ## 원격노드들을 찾아서 binding
       xpack.security.enabled: "false" ## 보안기능 활성화 여부
       xpack.monitoring.collection.enabled: "false" ## 클러스터링의 모니러팅 활성화 여부
+
   ## es-slave-1
   es-slave-1:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2

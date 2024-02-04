@@ -458,3 +458,114 @@ curl -X PUT -H 'Content-Type: application/json' -d '{"name":"김현철","age":30
 
 ![fluent4](./public/fluent-4.png)
 ![fluent5](./public/fluent-5.png)
+
+## 데이터분석) ES **(Analyzer , Tokenizer)
+
+- Tokenizer 
+    - 해당 단어를 분리하는 작업을 수행
+    - 공백, ", . /" 등을 기준으로 토큰을 분리
+    - 각 단어의 순서, 해당 단어의 시작과 끝자리의 offset을 기록
+
+
+```sh
+    ## install
+    bin/elasticsearch-plugin install analysis-nori
+    bin/elasticsearch-plugin remove analysis-nori
+
+    ## docker-compose 구동 (좋은 방법을 찾지 못함)
+    docker-compose up -d
+
+    ## 각 노드별로 접속해서 nori plugin
+    docker exec -it es01 bash
+    bin/elasticsearch-plugin install analysis-nori
+    docker restart [...] ## 모두 재시작...
+```
+
+```
+GET _analyze
+{
+  "tokenizer" : "standard",
+  "text" : [
+    "안녕, 나는 이동규야 반갑다"
+  ]
+}
+
+GET _analyze 
+{
+  "tokenizer": "nori_tokenizer",
+  "text" : [
+    "안녕, 나는 이동규야 반갑다"
+  ],
+  "explain": true
+}
+```
+
+![es-1](./public/es-1.png)
+![es-2](./public/es-2.png)
+
+## 데이터분석) 원하지 않은 품사 제거 
+
+```sh
+## example_stop_filter를 만드는데 -> IC를 제거한다..
+## IC => 감탄사를 정의...
+PUT example_pos
+{
+  "settings" : {
+    "index" : {
+      "analysis" : {
+        "filter" : {
+          "example_stop_filter": {
+            "type" : "nori_part_of_speech",
+            "stoptags" : [
+              "IC"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+
+GET example_pos/_analyze
+{
+  "tokenizer": "nori_tokenizer",
+  "filter" : [
+    "example_stop_filter"
+  ],
+  "text" : "우와 재밌네요"
+}
+
+```
+
+![es-3](./public/es-3.png)
+
+## 데이터분석) 하나의 단어 취급하기
+
+```
+
+PUT dg_pos
+{
+  "settings" : {
+      "analysis" : {
+        "tokenizer": {
+          "my_nori_filter": {
+            "type" : "nori_tokenizer",
+            "user_dictionary_rules" : [
+              "존나"
+          ]
+        }
+      }
+    }
+  }
+}
+
+GET dg_pos/_analyze
+{
+  "tokenizer": "nori_tokenizer",
+  "text" : "존나재밌네요"
+}
+```
+
+
+![es-4](./public/es-4.png)
+![es-5](./public/es-5.png)
