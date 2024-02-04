@@ -238,3 +238,148 @@ http {
     period: 10s
     hosts: ["http://kibana:5601"]
 ```
+
+## Kibana Dashboard Tools (Document API)
+
+```
+## GET Index
+GET dg_index/_doc
+GET dg_index/_doc/1
+GET dg_index/_doc/2
+GET dg_index/_doc/3
+
+## DELETE Index
+DELETE dg_index/_doc/1  ## 1번의 Data를 삭제
+DELETE dg_index/_doc    ## Document를 삭제
+DELETE dg_index         ## Index를 아예 삭제
+
+## Post Index
+POST dg_index/_update/1
+{
+  "doc" : {
+    "age" : 100
+  }
+}
+
+## 다중 Request
+POST _bulk
+{"index" : {"_index" : "dg_index", "_id" : "2"}}
+{"name" : "leedonggyu-2", "age": 31, "job": "SRE"}
+{"update" : {"_index" : "dg_index", "_id" : "1"}}
+{"doc": {"age": 100}}
+{"delete" : {"_index" : "dg_index", "_id" : "1"}}
+{"index" : {"_index" : "dg_index", "_id" : "3"}}
+{"name" : "someone-else", "age": 25, "job": "Engineer"}
+
+## Reindex API
+## A Index에서 B Index Copy
+
+POST dg-one/_doc/1
+{"name" : "leedonggyu", "age" : 32, "job" : "devops"}
+
+POST dg-one/_doc/2
+{"name" : "leedonggyu", "age" : 32, "job" : "sre"}
+
+POST dg-one/_doc/3
+{"name" : "leedonggyu", "age" : 33, "job" : "devsecops"}
+
+GET dg-one/_doc/3
+
+POST dg-one/_search
+{
+  "query": {
+    "query_string": {
+      "query": "job:devops OR job:sre OR job:devsecops"
+    }
+  }
+}
+
+POST dg-one/_search
+{
+  "query": {
+    "range": {
+      "age": {
+        "gte": 31,
+        "lte": 40
+      }
+    }
+  }
+}
+```
+
+## Kibana Dashbard Tools (use ecommerce Example Data)
+
+![result](./public/result.png)
+
+```
+GET kibana_sample_data_ecommerce/_search
+GET kibana_sample_data_ecommerce/_mapping
+
+GET kibana_sample_data_ecommerce/_search
+{
+  "size" : 0,
+  "aggs": {
+    "avgs_price" : {
+      "avg" : {
+        "field" : "products.base_price"
+      }
+    },
+    "max_price" : {
+      "max" : {
+        "field" : "products.base_price"
+      }
+    },
+    "min_price" : {
+      "min" : {
+        "field" : "products.base_price"
+      }
+    }
+  }
+}
+
+GET kibana_sample_data_ecommerce/_search
+{
+  "size" : 0,
+  "aggs": {
+    "stats_base_price" : {
+      "stats" : {
+        "field" : "products.base_price"
+      }
+    }
+  }
+}
+
+## customer_gender는 MALE에 base_price의 통계
+GET kibana_sample_data_ecommerce/_search
+{
+  "query" : {
+    "match" : {
+      "customer_gender" : "MALE"
+    }
+  },
+  "size" : 0,
+  "aggs": {
+    "stats_base_price" : {
+      "stats" : {
+        "field" : "products.base_price"
+      }
+    }
+  }
+}
+
+## category의 호출횟수
+GET kibana_sample_data_ecommerce/_search
+{
+  "size" : 0,
+  "aggs" : {
+    "category_count" : {
+      "terms": {
+        "field": "products.category.keyword"
+      }
+    }
+  }
+}
+```
+
+- <a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.10/search-search.html#search-search-api-path-params"> Elastic API Search Params </a>
+
