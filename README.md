@@ -209,6 +209,7 @@ http {
     restart: always
     volumes:
       - ./metricbeat.yml:/usr/share/metricbeat/metricbeat.yml
+      - /var/run/docker.sock:/var/run/docker.sock/ro
 
     ## metricbeat.yml
     metricbeat.config.modules:
@@ -225,11 +226,15 @@ http {
 
     metricbeat.modules:
     - module: elasticsearch
-        xpack.enabled: true
-        period: 10s
-        hosts:
-        [
-            "http://es-master-1:9200",
-            "http://es-slave-1:9200",
-        ]
+    xpack.enabled: true
+    period: 10s
+    hosts:
+      [
+        "http://es-master-1:9200",
+        "http://es-slave-1:9200",
+      ]
+    - module: kibana
+    xpack.enabled: true
+    period: 10s
+    hosts: ["http://kibana:5601"]
 ```

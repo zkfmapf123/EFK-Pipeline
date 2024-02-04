@@ -19,3 +19,7 @@ metricbeat.modules:
         "http://es-master-1:9200",
         "http://es-slave-1:9200",
       ]
+  - module: kibana
+    xpack.enabled: true
+    period: 10s
+    hosts: ["http://kibana:5601"]
