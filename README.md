@@ -383,3 +383,78 @@ GET kibana_sample_data_ecommerce/_search
 
 - <a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.10/search-search.html#search-search-api-path-params"> Elastic API Search Params </a>
 
+## Fluentd to ElasticSearch
+
+### Fluentd 구성
+
+```sh
+    ## Dockerfile
+FROM fluentd:latest
+
+USER root
+RUN gem install fluent-plugin-elasticsearch
+USER fluent
+```
+
+### fluentd.conf
+
+```conf
+<source>
+  @type forward
+  port 24224
+  bind 0.0.0.0
+</source>
+
+<source>
+  @type http
+  port 9800
+  bind 0.0.0.0
+  cors_allow_origins ["*"]
+</source>
+
+<match dg.**>
+  @type copy
+  <store>
+    @type elasticsearch
+    host 10.0.100.10
+    port 9200
+    logstash_format true
+    logstash_prefix fluentd
+    logstash_dateformat %Y%m%d
+    include_tag_key true
+    tag_key @log_name
+    flush_interval 1s
+  </store>
+  <store>
+    @type stdout
+    format json
+  </store>
+</match>
+```
+
+### fluentd에서 명령어 사용
+
+```
+curl -X PUT -H 'Content-Type: application/json' -d '{"name":"이동규","age":31, "job":"devops"}' http://localhost:9800/es
+
+curl -X PUT -H 'Content-Type: application/json' -d '{"name":"임재혁","age":30, "job":"frontend"}' http://localhost:9800/es
+
+curl -X PUT -H 'Content-Type: application/json' -d '{"name":"신정현","age":30, "job":"police"}' http://localhost:9800/es
+
+curl -X PUT -H 'Content-Type: application/json' -d '{"name":"김현철","age":30, "job":"police"}' http://localhost:9800/es
+```
+
+![fluent](./public/fluent.png)
+![fluent1.5](./public/fluentd-1.5.png)
+
+### ElasticSearch에서 확인
+    
+- Fluentd-* 형태로 쌓인다.. (파일형태로)
+
+![fluent-2](./public/fluentd-2.png)
+![fluent-3](./public/fluent-3.png)
+
+### ES Discover에서 활용하기
+
+![fluent4](./public/fluent-4.png)
+![fluent5](./public/fluent-5.png)
