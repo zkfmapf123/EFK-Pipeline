@@ -78,6 +78,7 @@ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose ## symbolic 링
 ```sh
 sudo vi /etc/sysctl.conf
 vm.max_map_count=262144
+sudo sysctl -p
 ```
 
 ## Nginx Revser Proxy
