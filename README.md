@@ -260,6 +260,11 @@ services:
 2. ES Docker-compose 파일 수정
 
 ```yml
+... ## volumes
+volumes:
+      - ./volumes/es-slave-1:/usr/share/elasticsearch/data
+      - ./volumes/certs:/usr/share/elasticsearch/config/certs ## config에 안놓으면 JAVA Permission Error 남..
+
 ...
 xpack.security.enabled: true ## 보안기능 활성화 여부
 xpack.security.transport.ssl.enabled: true
@@ -267,6 +272,7 @@ xpack.security.transport.ssl.verification_mode: certificate
 xpack.security.transport.ssl.certificate_authorities: /usr/share/elasticsearch/certs/ca/ca.crt
 xpack.security.transport.ssl.certificate: /usr/share/elasticsearch/certs/es-slave-1/es-slave-1.crt
 xpack.security.transport.ssl.key: /usr/share/elasticsearch/certs/es-slave-1/es-slave-1.key
+xpack.security.http.ssl.key: /usr/share/elasticsearch/config/certs/es-master-1/es-master-1.key
 xpack.monitoring.collection.enabled: "false"
 ```
 
@@ -295,11 +301,19 @@ kibana:
   ## TLS
   server.ssl.enabled: true
   server.ssl.certificate: /usr/share/kibana/config/certs/kibana/kibana.crt
-  server.ssl.key: /usr/share/kibana/config/certs/kibana/kibana.crt
+  server.ssl.key: /usr/share/kibana/config/certs/kibana/kibana.key
   elasticsearch.ssl.certificateAuthorities: [ "/usr/share/kibana/config/certs/ca/ca.crt" ]
   elasticsearch.ssl.verificationMode: certificate
 
   monitoring.ui.container.elasticsearch.enabled: true
+```
+
+4. ElasticSearch 패스워드 세팅
+
+```sh
+docker exec -it es-master-1 /bin/bash
+cd bin
+./elasticsearch-setup-passwords
 ```
 
 ## Stack Monitoring use MetricBeat

@@ -8,6 +8,7 @@ services:
       - "9200:9200"
     volumes:
       - ./volumes/es-master:/usr/share/elasticsearch/data
+      - ./volumes/certs:/usr/share/elasticsearch/config/certs
     ulimits: ## 프로세스가 사용할 수 있는 자원의 제한 설정
       memlock:
         soft: -1 ## Soft Limit (-1 제한 해제)
@@ -23,7 +24,12 @@ services:
       cluster.name: es-cluster ## Cluster 이름 (Required)
       cluster.initial_master_nodes: es-master-1
       discovery.seed_hosts: es-master-1,es-slave-1 ## 원격노드들을 찾아서 binding
-      xpack.security.enabled: "false" ## 보안기능 활성화 여부
+      xpack.security.enabled: true ## 보안기능 활성화 여부
+      xpack.security.transport.ssl.enabled: true
+      xpack.security.transport.ssl.verification_mode: certificate
+      xpack.security.transport.ssl.certificate_authorities: /usr/share/elasticsearch/config/certs/ca/ca.crt
+      xpack.security.transport.ssl.certificate: /usr/share/elasticsearch/config/certs/es-master-1/es-master-1.crt
+      xpack.security.transport.ssl.key: /usr/share/elasticsearch/config/certs/es-master-1/es-master-1.key
       xpack.monitoring.collection.enabled: "false" ## 클러스터링의 모니러팅 활성화 여부
 
   ## es-slave-1
@@ -32,6 +38,7 @@ services:
     container_name: es-slave-1
     volumes:
       - ./volumes/es-slave-1:/usr/share/elasticsearch/data
+      - ./volumes/certs:/usr/share/elasticsearch/config/certs
     ulimits:
       memlock:
         soft: -1
@@ -44,7 +51,12 @@ services:
       cluster.name: es-cluster
       cluster.initial_master_nodes: es-master-1
       discovery.seed_hosts: es-master-1,es-slave-1
-      xpack.security.enabled: "false"
+      xpack.security.enabled: true ## 보안기능 활성화 여부
+      xpack.security.transport.ssl.enabled: true
+      xpack.security.transport.ssl.verification_mode: certificate
+      xpack.security.transport.ssl.certificate_authorities: /usr/share/elasticsearch/config/certs/ca/ca.crt
+      xpack.security.transport.ssl.certificate: /usr/share/elasticsearch/config/certs/es-slave-1/es-slave-1.crt
+      xpack.security.transport.ssl.key: /usr/share/elasticsearch/config/certs/es-slave-1/es-slave-1.key
       xpack.monitoring.collection.enabled: "false"
 
   # ## es-slave-2
