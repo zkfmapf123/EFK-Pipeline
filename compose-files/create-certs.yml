@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  certs:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
+    container_name: create_certs
+    command: >
+      bash -c '
+        apt-get update && apt-get install -y -q -e 0 unzip;
+        if [[ ! -f /certs/bundle.zip ]]; then
+          bin/elasticsearch-certutil cert --silent --pem --in config/certificates/instances.yml -out /certs/bundle.zip;
+          unzip /certs/bundle.zip -d /certs;
+        fi;
+        chown -R 1000:0 /certs
+      '
+    working_dir: /usr/share/elasticsearch
+    volumes:
+      - ./instances.yml:/usr/share/elasticsearch/config/certificates/instances.yml
+      - ./volumes/certs:/certs
+      - ./volumes/:/usr/share/elasticsearch/config/certificates

@@ -197,6 +197,111 @@ http {
 	}
 ```
 
+## Elastic TLS 설정
+
+- TLS 설정하기 위해 필요한 파일들 (added)
+  - instances.yml => 인증서를 생성해야 하는 인스턴스를 식별하기 위한 파일
+  - .env => 엘라스틱 버전과 인증서가 생성될 위치를 지정한 환경변수가 세팅되어있는 파일
+  - create-certs.yml => 엘라스틱과 키바나를 위한 인증성 생성에 필요한 컨테이너
+
+```sh
+  ## es.docker-compose.yml
+  instances:
+  - name: es-master-1
+    dns:
+      - es-master-1
+      - localhost
+    ip:
+      - 127.0.0.1
+
+  - name: es-slave-1
+    dns:  
+      - es-slave-1
+      - localhost
+    ip:
+      - 127.0.0.1
+      
+  - name: kibana
+    dns:
+      - kibana
+      - localhost
+```
+
+```yml
+  ## create-certs.yml
+version: '3.8'
+
+services:
+  certs:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
+    container_name: create_certs
+    command: >
+      bash -c '
+        apt-get update && apt-get install -y -q -e 0 unzip;
+        if [[ ! -f /certs/bundle.zip ]]; then
+          bin/elasticsearch-certutil cert --silent --pem --in config/certificates/instances.yml -out /certs/bundle.zip;
+          unzip /certs/bundle.zip -d /certs;
+        fi;
+        chown -R 1000:0 /certs
+      '
+    working_dir: /usr/share/elasticsearch
+    volumes:
+      - ./instances.yml:/usr/share/elasticsearch/config/certificates/instances.yml
+      - ./volumes/certs:/certs
+      - ./volumes/:/usr/share/elasticsearch/config/certificates
+```
+
+- 실행순서
+
+1. docker-compose -f create-certs.yml up (인증서 파일 생성)
+
+![999](./public/999.png)
+
+2. ES Docker-compose 파일 수정
+
+```yml
+...
+xpack.security.enabled: true ## 보안기능 활성화 여부
+xpack.security.transport.ssl.enabled: true
+xpack.security.transport.ssl.verification_mode: certificate
+xpack.security.transport.ssl.certificate_authorities: /usr/share/elasticsearch/certs/ca/ca.crt
+xpack.security.transport.ssl.certificate: /usr/share/elasticsearch/certs/es-slave-1/es-slave-1.crt
+xpack.security.transport.ssl.key: /usr/share/elasticsearch/certs/es-slave-1/es-slave-1.key
+xpack.monitoring.collection.enabled: "false"
+```
+
+
+3. kibana.yml 수정
+
+```yml
+  ## kibana.docker-compose.yml
+kibana:
+    image: docker.elastic.co/kibana/kibana:7.16.2
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    volumes:
+      - ./volumes/certs:/usr/share/kibana/config/certs
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml ## 추가
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=2048" ## 2GB
+
+  ## kibana.yml
+  server.host: "0"
+  server.name: kibana
+  elasticsearch.hosts: ["http://es-master-1:9200"]
+  server.port: 5601
+
+  ## TLS
+  server.ssl.enabled: true
+  server.ssl.certificate: /usr/share/kibana/config/certs/kibana/kibana.crt
+  server.ssl.key: /usr/share/kibana/config/certs/kibana/kibana.crt
+  elasticsearch.ssl.certificateAuthorities: [ "/usr/share/kibana/config/certs/ca/ca.crt" ]
+  elasticsearch.ssl.verificationMode: certificate
+
+  monitoring.ui.container.elasticsearch.enabled: true
+```
+
 ## Stack Monitoring use MetricBeat
 
 ```yml
