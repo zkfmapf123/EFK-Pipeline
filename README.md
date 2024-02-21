@@ -73,6 +73,14 @@ sudo chmod +x /usr/local/bin/docker-compose
 sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose ## symbolic 링크생성
 ```
 
+## vm.max_map_count is too low issue
+
+```sh
+sudo vi /etc/sysctl.conf
+vm.max_map_count=262144
+sudo sysctl -p
+```
+
 ## Nginx Revser Proxy
 
 ```sh
