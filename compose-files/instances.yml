@@ -1,0 +1,19 @@
+instances:
+  - name: es-master-1
+    dns:
+      - es-master-1
+      - localhost
+    ip:
+      - 127.0.0.1
+
+  - name: es-slave-1
+    dns:  
+      - es-slave-1
+      - localhost
+    ip:
+      - 127.0.0.1
+      
+  - name: kibana
+    dns:
+      - kibana
+      - localhost

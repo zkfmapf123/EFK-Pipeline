@@ -3,7 +3,7 @@ version: '3.8'
 services:
   certs:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
-    container_name: create_certs
+    container_name: create-certs
     command: >
       bash -c '
         apt-get update && apt-get install -y -q -e 0 unzip;
