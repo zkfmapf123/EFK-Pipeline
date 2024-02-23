@@ -2,11 +2,6 @@
 
 ## Complete Architecture
 
-- [ ] ES Master
-- [ ] ES Slave 1, ES Slave 2
-- [ ] Kibana
-- [ ] TLS Setting (ELK)
-
 ![arch](./public/arch.png)
 
 ## 이론
