@@ -1,7 +1,7 @@
 tags=kibana,master,slave-1,slave-2
 
 s3-up:
-	@aws s3 cp ./compose-files s3://dk-compose-files/files --recursive
+	@aws s3 cp ./efk-pipeline/ s3://dk-compose-files/files --recursive
 
 ec2-up:
 	./shells/up.sh

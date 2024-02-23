@@ -45,7 +45,7 @@ module "es-master-1" {
   instance_subnet_id = lookup(module.network.vpc.was_subnets, "ap-northeast-2a")
   instance_sg_ids    = [aws_security_group.ec2-proxy-sg.id, aws_security_group.es-sg.id]
 
-  instance_type = "t4g.small"
+  instance_type = "t4g.medium"
   instance_ip_attr = {
     is_public_ip  = false
     is_eip        = false
@@ -66,69 +66,5 @@ module "es-master-1" {
     "Monitoring" : true,
     "MadeBy" : "terraform",
     "Name" : "master"
-  }
-}
-
-module "es-slave-1" {
-  source = "zkfmapf123/simpleEC2/lee"
-
-  instance_name      = "es-small-2"
-  instance_region    = "ap-northeast-2a"
-  instance_subnet_id = lookup(module.network.vpc.was_subnets, "ap-northeast-2a")
-  instance_sg_ids    = [aws_security_group.ec2-proxy-sg.id, aws_security_group.es-sg.id]
-
-  instance_type = "t4g.small"
-  instance_ip_attr = {
-    is_public_ip  = false
-    is_eip        = false
-    is_private_ip = true
-    private_ip    = "10.0.100.11"
-  }
-
-  instance_iam = aws_iam_instance_profile.ssm-ec2-profile.name
-
-  instance_key_attr = {
-    is_alloc_key_pair = false
-    is_use_key_path   = false
-    key_name          = ""
-    key_path          = "~/.ssh/id_rsa.pub"
-  }
-
-  instance_tags = {
-    "Monitoring" : true,
-    "MadeBy" : "terraform",
-    "Name" : "slave-1"
-  }
-}
-
-module "es-slave-2" {
-  source = "zkfmapf123/simpleEC2/lee"
-
-  instance_name      = "es-small-2"
-  instance_region    = "ap-northeast-2a"
-  instance_subnet_id = lookup(module.network.vpc.was_subnets, "ap-northeast-2a")
-  instance_sg_ids    = [aws_security_group.ec2-proxy-sg.id, aws_security_group.es-sg.id]
-
-  instance_type = "t4g.small"
-  instance_ip_attr = {
-    is_public_ip  = false
-    is_eip        = false
-    is_private_ip = true
-    private_ip    = "10.0.100.12"
-  }
-
-  instance_iam = aws_iam_instance_profile.ssm-ec2-profile.name
-
-  instance_key_attr = {
-    is_alloc_key_pair = false
-    is_use_key_path   = false
-    key_name          = ""
-    key_path          = "~/.ssh/id_rsa.pub"
-  }
-
-  instance_tags = {
-    "Monitoring" : true,
-    "MadeBy" : "terraform",
-    "Name" : "slave-2"
   }
 }
