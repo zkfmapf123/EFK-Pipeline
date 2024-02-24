@@ -1,0 +1,50 @@
+version: "3.8"
+
+volumes:
+  certs:
+    driver: local
+
+services:
+  server:
+    image: zkfmapf123/node-fluentd:5.0
+    platform: linux/amd64
+    container_name: server
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 172.27.0.4
+        tag: server
+    depends_on:
+      - fluentd
+    networks:
+      - nw
+
+  fluentd:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fluentd
+    hostname: fluentd
+    restart: always
+    volumes:
+      - ./fluentd.conf:/fluentd/etc/fluent.conf
+      - certs:/fluentd/etc/certs:ro
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+      - "9800:9800"
+    networks:
+      nw:
+        ipv4_address: 10.5.0.5
+
+networks:
+  nw:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1
